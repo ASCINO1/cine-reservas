@@ -1,0 +1,151 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Reserva de Película</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+    <style>
+        h1, h2 { text-shadow: 1px 1px 3px #ffffff; }
+        .movie-info {
+            display: flex; margin-bottom: 20px;
+            background: rgba(2, 2, 2, 0.75);
+            padding: 15px; border-radius: 10px; gap: 15px;
+        }
+        .movie-info img { width: 150px; height: 220px; object-fit: cover; border-radius: 10px; }
+        .details { flex: 1; }
+        .trailer { margin-top: 20px; text-align: center; }
+        label { display: block; margin: 10px 0 5px 0; }
+        input, select, button {
+            width: 100%; max-width: 350px; padding: 8px;
+            border-radius: 5px; border: none; font-size: 1rem; margin-bottom: 15px;
+        }
+        button { background-color: #007bff; color: #fff; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        .seats {
+            display: grid; grid-template-columns: repeat(10, 1fr);
+            gap: 5px; margin: 20px 0; max-width: 350px;
+        }
+        .seat { width: 30px; height: 30px; border: 1px solid #000;
+            text-align: center; line-height: 30px; cursor: pointer; color: #000; }
+        .seat.available { background-color: #fff; }
+        .seat.selected { background-color: #0f0; color: #000; }
+        .seat.occupied { background-color: #f00; cursor: not-allowed; color: #000; }
+        .seat.premium { border: 2px solid gold; background-color: #ffd700; color: #000; }
+        .pricing, .my-reservations {
+            margin-top: 20px; background: rgba(0,0,0,0.6);
+            padding: 15px; border-radius: 10px; color: #fff;
+        }
+        .reservation-item {
+            margin-bottom: 10px; padding: 10px;
+            background: rgba(255,255,255,0.1); border-radius: 5px; color: #fff;
+        }
+        .reservation-item button { background-color: #dc3545; margin-top: 5px; }
+        .reservation-item button:hover { background-color: #c82333; }
+    </style>
+</head>
+<body>
+    <h1>Reserva tu Asiento</h1>
+
+    <!-- Información de la película -->
+    <div class="movie-info">
+        <img src="{{ pelicula.imagen }}" alt="{{ pelicula.titulo }}">
+        <div class="details">
+            <h2>{{ pelicula.titulo }}</h2>
+            <p>{{ pelicula.sinopsis }}</p>
+            <p><strong>Rating:</strong> {{ pelicula.rating }}</p>
+            <p>📅 {{ pelicula.fecha }} ⏰ {{ pelicula.hora }}</p>
+        </div>
+    </div>
+
+    <!-- Formulario de reserva -->
+    <h2>Detalles de Reserva</h2>
+    <form method="post" action="/hacer_reserva" id="reservationForm">
+        <input type="hidden" name="pelicula_id" value="{{ id }}">
+        <input type="hidden" name="selectedSeats" id="selectedSeatsInput">
+
+        <label for="name">Nombre:</label>
+        <input type="text" name="usuario" id="name" placeholder="Tu nombre" required>
+
+        <label for="age">Edad:</label>
+        <input type="number" name="edad" id="age" placeholder="Tu edad" min="1" required> 
+
+        <label for="cinema">Cine:</label>
+        <select name="cinema" id="cinema">
+            <option value="Cine A">Cine A</option>
+            <option value="Cine B">Cine B</option>
+            <option value="Cine C">Cine C</option>
+        </select>
+
+        <label for="room">Sala:</label>
+        <select name="room" id="room">
+            <option value="Sala 1">Sala 1</option>
+            <option value="Sala 2">Sala 2</option>
+            <option value="Sala 3">Sala 3</option>
+        </select>
+
+        <div class="pricing" id="pricing">
+            <h3>Precios</h3>
+            <p>Asiento Normal: $15</p>
+            <p>Asiento Premium (VIP): $25</p>
+            <p id="totalPrice">Total: $0</p>
+        </div>
+
+        <button type="submit" id="reserveBtn">Reservar</button>
+    </form>
+
+    <!-- Asientos -->
+    <h2>Selecciona un Asiento</h2>
+    <div id="seats" class="seats"></div>
+
+    <script>
+        const seatsContainer = document.getElementById('seats');
+        const reserveBtn = document.getElementById('reserveBtn');
+        const totalPriceEl = document.getElementById('totalPrice');
+        const selectedSeatsInput = document.getElementById('selectedSeatsInput');
+
+        let selectedSeats = [];
+        const totalSeats = 100;
+        const premiumSeats = [45, 46, 55, 56];
+        const prices = { normal: 10, premium: 15 };
+
+        function updateTotalPrice() {
+            let total = 0;
+            selectedSeats.forEach(seat => {
+                total += premiumSeats.includes(seat) ? prices.premium : prices.normal;
+            });
+            totalPriceEl.textContent = `Total: $${total}`;
+        }
+
+        function renderSeats() {
+            seatsContainer.innerHTML = '';
+            for (let i = 0; i < totalSeats; i++) {
+                const seat = document.createElement('div');
+                seat.classList.add('seat');
+                seat.textContent = i + 1;
+                if (selectedSeats.includes(i)) {
+                    seat.classList.add('selected');
+                } else {
+                    seat.classList.add('available');
+                    if (premiumSeats.includes(i)) seat.classList.add('premium');
+                    seat.addEventListener('click', () => {
+                        if (seat.classList.contains('selected')) {
+                            seat.classList.remove('selected');
+                            selectedSeats = selectedSeats.filter(s => s !== i);
+                        } else {
+                            seat.classList.add('selected');
+                            selectedSeats.push(i);
+                        }
+                        updateTotalPrice();
+                        selectedSeatsInput.value = selectedSeats.join(',');
+                    });
+                }
+                seatsContainer.appendChild(seat);
+            }
+        }
+
+        renderSeats();
+    </script>
+</body>
+</html>

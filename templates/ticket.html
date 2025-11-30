@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Ticket de Reserva</title>
+    <style>
+        body {
+            background: #f4f4f4;
+            font-family: Arial, sans-serif;
+        }
+        .ticket {
+            max-width: 500px;
+            margin: 50px auto;
+            background: #fff;
+            border: 2px dashed #333;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        p {
+            margin: 8px 0;
+            font-size: 1.1rem;
+        }
+        .highlight {
+            font-weight: bold;
+            color: #007bff;
+        }
+        .qr {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .qr img {
+            width: 200px;
+            height: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div class="ticket">
+        <h1>🎟️ Ticket de Reserva</h1>
+        <p><span class="highlight">Usuario:</span> {{ reserva.usuario }}</p>
+        <p><span class="highlight">Edad:</span> {{ reserva.edad }}</p>
+        <p><span class="highlight">Película:</span> {{ pelicula.titulo }}</p>
+        <p><span class="highlight">Cine:</span> {{ reserva.cinema }}</p>
+        <p><span class="highlight">Sala:</span> {{ reserva.room }}</p>
+        <p><span class="highlight">Asientos:</span> {{ reserva.selectedSeats }}</p>
+        <p><span class="highlight">Total:</span> ${{ reserva.total }}</p>
+
+        <!-- Código QR -->
+        <div class="qr">
+            <img src="data:image/png;base64,{{ qr_code }}" alt="Código QR">
+        </div>
+
+        <p style="text-align:center; margin-top:20px;">¡Gracias por tu compra!</p>
+    </div>
+</body>
+</html>

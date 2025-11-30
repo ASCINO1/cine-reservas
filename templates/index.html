@@ -1,0 +1,73 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Películas Disponibles</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+    <style>
+        h1 {
+            text-align: center;
+            text-shadow: 1px 1px 3px #ffffff;
+        }
+        .movie-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        .movie {
+            background: rgba(0,0,0,0.6);
+            border-radius: 10px;
+            width: 280px;
+            padding: 15px;
+            cursor: pointer;
+            box-shadow: 0 0 10px #000;
+            transition: transform 0.2s;
+            color: #fff;
+        }
+        .movie:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px #0f0;
+        }
+        .movie img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 8px;
+            display: block;
+            margin-bottom: 10px;
+        }
+        .movie-title {
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+        .synopsis {
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+            height: 70px;
+            overflow: hidden;
+        }
+        .fecha-hora {
+            font-size: 0.9rem;
+            margin-top: 5px;
+            color: #ffd700;
+        }
+    </style>
+</head>
+<body>
+    <h1>Películas Disponibles</h1>
+    <div class="movie-list">
+        {% for id, peli in peliculas.items() %}
+        <div class="movie" onclick="window.location.href='/reservas?id={{ id }}'">
+            <img src="{{ peli.imagen }}" alt="{{ peli.titulo }}">
+            <div class="movie-title">{{ peli.titulo }}</div>
+            <div class="synopsis">{{ peli.sinopsis }}</div>
+            <div class="fecha-hora">📅 {{ peli.fecha }} ⏰ {{ peli.hora }}</div>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

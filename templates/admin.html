@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Panel de Administración</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+    <style>
+        h1, h2 { text-align: center; text-shadow: 1px 1px 3px #ffffff; }
+        .panel {
+            max-width: 900px; margin: 20px auto;
+            background: rgba(0,0,0,0.7); padding: 20px;
+            border-radius: 10px; color: #fff;
+        }
+        .movie-block, .reservation-block, .stats-block {
+            margin-bottom: 25px; padding: 15px;
+            background: rgba(255,255,255,0.1); border-radius: 8px;
+        }
+        label { display: block; margin: 8px 0 4px; }
+        input, select, button {
+            padding: 8px; border-radius: 5px; border: none;
+            margin-bottom: 10px; font-size: 1rem;
+        }
+        input[type="date"], input[type="time"] { width: 150px; }
+        button { background-color: #007bff; color: #fff; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        .delete-btn { background-color: #dc3545; }
+        .delete-btn:hover { background-color: #c82333; }
+    </style>
+</head>
+<body>
+    <h1>Panel de Administración</h1>
+    <div class="panel">
+
+        <!-- Estadísticas -->
+        <h2>📊 Estadísticas</h2>
+        <div class="stats-block">
+            <p><strong>Total de reservas:</strong> {{ total_reservas }}</p>
+            <p><strong>Total recaudado:</strong> ${{ total_recaudado }}</p>
+            <p><strong>Película más reservada:</strong> {{ pelicula_popular }}</p>
+        </div>
+
+        <!-- Gestión de películas -->
+        <h2>🎬 Películas</h2>
+        {% for id, peli in peliculas.items() %}
+        <div class="movie-block">
+            <h3>Editar {{ peli.titulo }}</h3>
+            <form method="post" action="/admin/edit/{{ id }}">
+                <label>Título:</label>
+                <input type="text" name="titulo" value="{{ peli.titulo }}">
+
+                <label>Imagen (URL):</label>
+                <input type="text" name="imagen" value="{{ peli.imagen }}">
+
+                <label>Sinopsis:</label>
+                <textarea name="sinopsis">{{ peli.sinopsis }}</textarea>
+
+                <label>Rating:</label>
+                <select name="rating">
+                    <option value="PG" {% if peli.rating == "PG" %}selected{% endif %}>PG</option>
+                    <option value="PG-13" {% if peli.rating == "PG-13" %}selected{% endif %}>PG-13</option>
+                    <option value="R" {% if peli.rating == "R" %}selected{% endif %}>R</option>
+                </select>
+
+                <label>Fecha:</label>
+                <input type="date" name="fecha" value="{{ peli.fecha }}">
+
+                <label>Hora:</label>
+                <input type="time" name="hora" value="{{ peli.hora }}">
+
+                <button type="submit">Guardar Cambios</button>
+            </form>
+        </div>
+        {% endfor %}
+
+        <!-- Gestión de reservas -->
+        <h2>🪑 Reservas</h2>
+        {% if reservas %}
+            {% for r in reservas %}
+            <div class="reservation-block">
+                <p><strong>Usuario:</strong> {{ r.usuario }}</p>
+                <p><strong>Película:</strong> {{ peliculas[r.pelicula_id].titulo }}</p>
+                <p><strong>Edad:</strong> {{ r.edad }}</p>
+                <p><strong>Cine:</strong> {{ r.cinema }}</p>
+                <p><strong>Sala:</strong> {{ r.room }}</p>
+                <p><strong>Asientos:</strong> {{ r.selectedSeats }}</p>
+                <p><strong>Total:</strong> ${{ r.total }}</p>
+                <form method="post" action="/admin/delete/{{ loop.index0 }}">
+                    <button type="submit" class="delete-btn">Eliminar Reserva</button>
+                </form>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No hay reservas registradas.</p>
+        {% endif %}
+
+        <!-- Botón de logout -->
+        <div style="text-align:center; margin-top:20px;">
+            <form action="{{ url_for('logout') }}" method="get">
+                <button type="submit" style="padding:10px 20px; background-color:#dc3545; border:none; border-radius:5px; color:#fff; font-size:1rem; cursor:pointer;">
+                    🔒 Cerrar sesión
+                </button>
+            </form>
+        </div>
+
+    </div>
+</body>
+</html>
