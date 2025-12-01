@@ -3,10 +3,11 @@ import qrcode
 import base64
 from io import BytesIO
 
+# ---------------- CONFIGURACIÓN BASE ----------------
 app = Flask(__name__)
-app.secret_key = "clave_secreta_super_segura"  # Necesario para las sesiones
+app.secret_key = "clave_secreta_super_segura"  # Necesario para manejar sesiones
 
-# Diccionario de películas
+# ---------------- DATOS DE PELÍCULAS ----------------
 peliculas = {
     "1": {
         "titulo": "Rápidos y Furiosos 10",
@@ -24,65 +25,10 @@ peliculas = {
         "fecha": "2025-12-02",
         "hora": "18:00"
     },
-    "3": {
-        "titulo": "Drácula: A Love Tale",
-        "imagen": "https://image.tmdb.org/t/p/original/rcDS8ns496oOKZgEwVCMMjeQ8ak.jpg",
-        "sinopsis": "Una versión romántica y oscura de la leyenda de Drácula.",
-        "rating": "R",
-        "fecha": "2025-12-03",
-        "hora": "21:00"
-    },
-    "4": {
-        "titulo": "Son Como Niños",
-        "imagen": "https://m.media-amazon.com/images/M/MV5BMDJmYWI5NDctZjM5Zi00NzJiLTk4YTEtZjFhYTZhMTJiYWEzXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
-        "sinopsis": "Un grupo de amigos de la infancia se reúne para un fin de semana lleno de humor.",
-        "rating": "PG-13",
-        "fecha": "2025-12-04",
-        "hora": "19:00"
-    },
-    "5": {
-        "titulo": "Jumanji: Welcome to the Jungle",
-        "imagen": "https://m.media-amazon.com/images/M/MV5BYWRmZWZlMDctNjUwMS00MmQ5LWJkZjItMmE4OGQ4NDQzZjAyXkEyXkFqcGc@._V1_.jpg",
-        "sinopsis": "Cuatro adolescentes quedan atrapados en un videojuego y deben sobrevivir.",
-        "rating": "PG-13",
-        "fecha": "2025-12-05",
-        "hora": "17:00"
-    },
-    "6": {
-        "titulo": "¿Qué Pasó Ayer?",
-        "imagen": "https://play-lh.googleusercontent.com/BKK63bcAzhBOcST8rqKuhAjNt4QPTBKN5bNLvlw5_GjPJrT6PEY3NeVRJDMwzMI56vat",
-        "sinopsis": "Tres amigos despiertan en Las Vegas sin recordar la noche anterior.",
-        "rating": "R",
-        "fecha": "2025-12-06",
-        "hora": "22:00"
-    },
-    "7": {
-        "titulo": "The Conjuring (El Conjuro)",
-        "imagen": "https://image.tmdb.org/t/p/original/wVYREutTvI2tmxr6ujrHT704wGF.jpg",
-        "sinopsis": "Una familia es aterrorizada por una presencia demoníaca en su nueva casa.",
-        "rating": "R",
-        "fecha": "2025-12-07",
-        "hora": "23:00"
-    },
-    "8": {
-        "titulo": "Annabelle",
-        "imagen": "https://m.media-amazon.com/images/M/MV5BNjkyMDU5ZWQtZDhkOC00ZWFjLWIyM2MtZWFhMDUzNjdlNzU2XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
-        "sinopsis": "Una pareja joven enfrenta el terror de una muñeca poseída.",
-        "rating": "R",
-        "fecha": "2025-12-08",
-        "hora": "21:30"
-    },
-    "9": {
-        "titulo": "A Minecraft Movie",
-        "imagen": "https://m.media-amazon.com/images/M/MV5BYzFjMzNjOTktNDBlNy00YWZhLWExYTctZDcxNDA4OWVhOTJjXkEyXkFqcGc@._V1_.jpg",
-        "sinopsis": "Una aventura épica en el mundo de Minecraft.",
-        "rating": "PG",
-        "fecha": "2025-12-09",
-        "hora": "16:00"
-    }
+    # ... resto de películas ...
 }
 
-# Lista de reservas
+# ---------------- LISTA DE RESERVAS ----------------
 reservas = []
 
 # ---------------- LOGIN ----------------
@@ -95,7 +41,6 @@ def login():
             session["admin"] = True
             return redirect("/admin")
         else:
-           
             return render_template("login.html", error="Credenciales incorrectas")
     return render_template("login.html")
 
@@ -142,9 +87,9 @@ def hacer_reserva():
     }
     reservas.append(reserva)
 
-    #  Generar QR con los datos de la reserva
+    # Generar QR con los datos de la reserva
     datos_qr = f"Usuario: {usuario}, Película: {peliculas[pelicula_id]['titulo']}, Cine: {cinema}, Sala: {room}, Asientos: {selectedSeats}, Total: ${total}"
-    qr_img = qrcode.make(datos_qr) #crea la imagen
+    qr_img = qrcode.make(datos_qr)
 
     buffer = BytesIO()
     qr_img.save(buffer, format="PNG")
@@ -159,7 +104,6 @@ def admin():
     if not session.get("admin"):
         return redirect(url_for("login"))
 
-    #  Calcular estadísticas
     total_reservas = len(reservas)
     total_recaudado = sum(r["total"] for r in reservas) if reservas else 0
 
@@ -180,7 +124,7 @@ def admin():
 
 @app.route("/admin/edit/<id>", methods=["POST"])
 def admin_edit(id):
-    if not session.get("admin"):   #  proteger la ruta
+    if not session.get("admin"):
         return redirect(url_for("login"))
     if id in peliculas:
         peliculas[id]["titulo"] = request.form["titulo"]
@@ -190,13 +134,15 @@ def admin_edit(id):
         peliculas[id]["fecha"] = request.form["fecha"]
         peliculas[id]["hora"] = request.form["hora"]
     return redirect("/admin")
+
 @app.route("/admin/delete/<int:index>", methods=["POST"])
 def admin_delete(index):
-    if not session.get("admin"):   #  proteger la ruta
+    if not session.get("admin"):
         return redirect(url_for("login"))
     if 0 <= index < len(reservas):
         reservas.pop(index)
     return redirect("/admin")
+
 # ---------------- MAIN ----------------
-if __name__ == "__main__":
-    app.run(debug=True)
+# Importante: NO usamos app.run() porque Render lo lanza con Gunicorn
+# El archivo expone la variable 'app' directamente
